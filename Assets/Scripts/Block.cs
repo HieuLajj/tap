@@ -108,7 +108,7 @@ public class Block : MonoBehaviour
         {
            
             float t = elapsedTime / duration;
-            transform.position = Vector3.Lerp(startPosition, endPosition, t);
+            transform.localPosition = Vector3.Lerp(startPosition, endPosition, t);
             transform.rotation = Quaternion.Lerp(startRotation, endRotation, t);
             transform.localScale = Vector3.Lerp(startScale, endScale, t);
             elapsedTime += Time.deltaTime; 
