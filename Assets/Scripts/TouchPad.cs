@@ -8,6 +8,7 @@ public class Touchpad : MonoBehaviour
     private Vector2 touchInput, prevDelta, dragInput;
     private bool isPressed;
     private EventTrigger eventTrigger;
+  
 
     void Start()
     {
@@ -33,6 +34,7 @@ public class Touchpad : MonoBehaviour
             data.Use();
             isPressed = true;
             prevDelta = dragInput = evData.position;
+            
         });
 
         eventTrigger.triggers.Add(new EventTrigger.Entry { callback = a, eventID = EventTriggerType.PointerDown });
@@ -44,6 +46,7 @@ public class Touchpad : MonoBehaviour
             var evData = (PointerEventData)data;
             data.Use();
             dragInput = evData.position;
+            
         });
 
         eventTrigger.triggers.Add(new EventTrigger.Entry { callback = b, eventID = EventTriggerType.Drag });
@@ -54,6 +57,7 @@ public class Touchpad : MonoBehaviour
         {
             touchInput = Vector2.zero;
             isPressed = false;
+          
         });
 
         eventTrigger.triggers.Add(new EventTrigger.Entry { callback = c, eventID = EventTriggerType.EndDrag });

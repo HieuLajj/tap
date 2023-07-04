@@ -7,40 +7,44 @@ public class Controller : MonoBehaviour
 {
     public Vector3 screenPosition;
     public Vector3 worldPosition;
-
+    public float timer = 0f;
+    public UIManager manager;
     //int m,x,y,z;
     //int n;
     //int z;
     // Update is called once per frame
+    private void Start()
+    {
+        timer = 0;
+    }
     void Update()
     {
 
-        if(Input.GetMouseButtonDown(0))
+        if(Input.GetMouseButton(0))
         {
-            screenPosition = Input.mousePosition;
-            Ray ray = Camera.main.ScreenPointToRay(screenPosition);
-
-            if (Physics.Raycast(ray, out RaycastHit hitData, Mathf.Infinity, 1 << 6))
+            timer += Time.deltaTime;
+            if (timer > 0.15f)
             {
-               
-                Block block = hitData.collider.GetComponent<Block>();
-                block.checkRay();
-
+                manager.Ok();
             }
         }
-        //z = 2; x = 4; y = 5;
-        //for(int i=0; i<=y 5; i++)
-        //{
-        //    tangylenmoivonglap
-        //    for(int j=0; j < x 4; j++)
-        //    {
-        //       tangxlen1.5moivonglap
-        //        for(int m = 0; m< z 2; m++)
-        //        {
-        //            z = 0;
-        //            z + 1.5;
-        //        }
-        //    }
-        //}
+        if(Input.GetMouseButtonUp(0))
+        {
+            if (timer <= 0.15f)
+            {
+                screenPosition = Input.mousePosition;
+                Ray ray = Camera.main.ScreenPointToRay(screenPosition);
+
+                if (Physics.Raycast(ray, out RaycastHit hitData, Mathf.Infinity, 1 << 6))
+                {
+
+                    Block block = hitData.collider.GetComponentInParent<Block>();
+                    block.checkRay();
+
+                }
+            }
+            timer = 0;
+        }
+      
     }
 }
