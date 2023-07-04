@@ -22,14 +22,13 @@ public class Test : MonoBehaviour
     private void Start()
     {
         LoaddataFromLocal();
-        Edittext(lines[10]);
-        pretransform.localPosition = new Vector3(2, 2.5f, 1);
+        Edittext(lines[8]);
+        pretransform.localPosition = new Vector3((float)arrayxyz[1]/2, (float)arrayxyz[2]/2, (float)arrayxyz[0]/2);
+        Camera.main.transform.position = new Vector3((float)arrayxyz[1] / 2, (float)arrayxyz[2] / 2, -10);
+        // Debug.Log((float)arrayxyz[0]+"=="+(float)arrayxyz[2]+"=="+ (float)arrayxyz[1]);
         CreateMap();
     }
-    private void Update()
-    {
-     
-    }
+ 
     public void Tests()
     {
         for (int i = 0; i < object1212.Length; i++)

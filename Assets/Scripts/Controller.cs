@@ -17,10 +17,9 @@ public class Controller : MonoBehaviour
     {
         timer = 0;
     }
-    void Update()
+    private void LateUpdate()
     {
-
-        if(Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0))
         {
             timer += Time.deltaTime;
             if (timer > 0.15f)
@@ -28,7 +27,7 @@ public class Controller : MonoBehaviour
                 manager.Ok();
             }
         }
-        if(Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(0))
         {
             if (timer <= 0.15f)
             {
@@ -45,6 +44,6 @@ public class Controller : MonoBehaviour
             }
             timer = 0;
         }
-      
     }
+    
 }
