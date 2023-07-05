@@ -45,13 +45,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 897aab1c4c1e2f14eb676053ae364d80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Direction: 0
-  preposition: {x: 0, y: 0, z: 0}
-  prerotation: {x: 0, y: 0, z: 0, w: 0}
   checkmax: 6
   duration: 1
-  startPosition: {x: 0, y: 0, z: 0}
-  endPosition: {x: 0, y: 0, z: 0}
+  statusBlock: 1
   ModelBlock: {fileID: 4404698285632119278}
 --- !u!1001 &3594373953324506303
 PrefabInstance:

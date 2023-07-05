@@ -7,30 +7,29 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.UIElements;
+using static Unity.Collections.AllocatorManager;
 using Random = UnityEngine.Random;
 
 public enum DirectionBlock
 {
     Down,
     Up,
-    Forward,
     Back,
+    Forward,
     Left,
     Right,
 }
-public class Block : MonoBehaviour
+public class Block : MonoBehaviour, IListenerBlock
 {
-    public DirectionBlock Direction;
-    public Vector3 preposition;
-    public Quaternion prerotation;
-    RaycastHit hit;
     public float checkmax;
-    public float duration = 2.5f;
+    public float duration = 2f;
 
-
-    public Vector3 startPosition;
-    public Vector3 endPosition;
+    private RaycastHit hit;
+    private DirectionBlock Direction;
+    private Vector3 startPosition;
+    private Vector3 endPosition;
     private Quaternion startRotation;
     private Vector3 startScale;  
     private float randomScale = 0;
@@ -38,46 +37,59 @@ public class Block : MonoBehaviour
     private Vector3 dir2;
 
     private bool animationback = true;
+    public bool statusBlock = true;
 
     public GameObject ModelBlock;
-    private void Awake()
+ 
+    private void OnEnable()
     {
-        prerotation = transform.rotation;
         endPosition = transform.position;
     }
-    
+   
+    //public void SetEndPosition(Vector3 poi2)
+    //{
+    //    endPosition = poi2;
+    //    Debug.Log(endPosition + "cothaydoi");
+    //}
     public void checkRay()
     {
-        checkDirection();
-        if (Physics.Raycast(transform.position, dir, out hit, checkmax, 1 << 6))
+        if (animationback == true)
         {
-            if (hit.distance < 1)
+            checkDirection();
+            if (Physics.Raycast(transform.position, dir, out hit, Mathf.Infinity, 1 << 6))
             {
-                RunAwaitBack(dir, dir2);
+                Block blockcheck = hit.collider.GetComponentInParent<Block>();
+                if (!blockcheck.statusBlock)
+                {
+                    RunBlock();
+                    return;
+                }
+                if (hit.distance < 1)
+                {
+                    RunAwaitBack(dir, dir2);
+                }
+                else
+                {
+                    RunAwait2(blockcheck);
+                }
             }
             else
             {
-                RunAwait2(hit.collider.GetComponentInParent<Block>());
+                RunBlock();
             }
-        }
-        else
-        {
-            RunBlock();
         }
     }
 
     public void RunAwaitBack(Vector3 dircheck, Vector3 animationdir)
     {
      
-        if(animationback == true)
-        {
             animationback = false;
             Vector3 originalPosition = transform.localPosition;
             Vector3 targetPosition = originalPosition + animationdir * 0.2f;
             transform.DOLocalMove(targetPosition, 0.2f).OnComplete(() =>
             {
       
-                if (Physics.Raycast(transform.position, dircheck, out hit, checkmax, 1 << 6))
+                if (Physics.Raycast(transform.position, dircheck, out hit, Mathf.Infinity, 1 << 6))
                 {
                     Block blockdir = hit.collider.GetComponentInParent<Block>();
                     if(hit.distance < 1)
@@ -90,33 +102,51 @@ public class Block : MonoBehaviour
                     animationback = true;
                 });
             });
-        }
+        
     }
 
     public void RunAwait2(Block b)
     {
-        //Debug.Log(b.name+"chay thang 2 ne"+ dir2);
-        Vector3 originalPosition = transform.localPosition;
-
+        //if (animationback == true)
+        //{
+        //    animationback = false;
+        //    Vector3 originalPosition = transform.localPosition;
+        //    Vector3 targetPosition = b.transform.localPosition - dir2;
+        //    transform.DOLocalMove(targetPosition, 0.5f).OnComplete(() =>
+        //    {
+        //        transform.DOLocalMove(originalPosition, 0.5f).OnComplete(() =>
+        //        {
+        //            animationback = true;
+        //        });
+        //    });
+        //}
+       
+        Vector3 originalPosition = ModelBlock.transform.localPosition;
+        b.transform.parent = transform;
         Vector3 targetPosition = b.transform.localPosition - dir2;
-        transform.DOLocalMove(targetPosition, 0.5f).OnComplete(() =>
+        ModelBlock.gameObject.transform.DOLocalMove(targetPosition, 0.5f).OnComplete(() =>
         {
-            transform.DOLocalMove(originalPosition, 0.5f);
+            ModelBlock.gameObject.transform.DOLocalMove(originalPosition, 0.5f).OnComplete(() =>
+            {
+                animationback = true;
+            });
         });
     }
 
 
     public void RunBlock()
     {
+        statusBlock = false;
         checkDirection();
-        StartCoroutine(Run());
+        transform.parent = LevelManager.Instance.temporarymain;
+        StartCoroutine(Run(transform.TransformDirection(dir2)));
     }
-    IEnumerator Run()
+    IEnumerator Run(Vector3 bb)
     {
         
         for (float alpha = 20f; alpha >= 0; alpha -= 0.1f)
         {
-            transform.Translate(dir2* 10 * Time.deltaTime);
+            transform.Translate(bb* 10 * Time.deltaTime, Space.World);
             yield return null;
         }
         gameObject.SetActive(false);
@@ -132,7 +162,10 @@ public class Block : MonoBehaviour
         randomScale = Random.Range(0.5f, 2f);
         transform.localScale = new Vector3(randomScale, randomScale, randomScale);
         transform.rotation = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
-        transform.DOMove(endPosition, 2f).SetEase(Ease.OutQuad);
+        transform.DOMove(endPosition, 2f).SetEase(Ease.OutQuad).OnComplete(() =>
+        {
+            Controller.Instance.Checkawaitload();
+        });
         transform.DORotate(new Vector3(0, 360, 0), 2f, RotateMode.FastBeyond360).OnComplete(() =>
         {
             transform.rotation = startRotation;
@@ -222,7 +255,8 @@ public class Block : MonoBehaviour
                 ModelBlock.transform.eulerAngles = new Vector3(180, 0, 0);
                 break;
             case 4:
-                Direction = DirectionBlock.Forward;                
+                Direction = DirectionBlock.Forward;
+                ModelBlock.transform.eulerAngles = new Vector3(0, 0, 0);
                 dir2 = Vector3.forward;
                 break;
             case 5:
@@ -236,8 +270,8 @@ public class Block : MonoBehaviour
                 ModelBlock.transform.eulerAngles = new Vector3(0, 90, 0);
                 break;
             default:
-                Direction = DirectionBlock.Right;          
-                dir2 = Vector3.right;
+                //Direction = DirectionBlock.Right;          
+                //dir2 = Vector3.right;
                 break;
         }
     }
@@ -249,4 +283,15 @@ public class Block : MonoBehaviour
         startPosition = transform.position;
     }
 
+    public int IType()
+    {
+        if (!gameObject.activeInHierarchy)
+        {
+            return -1;
+        }
+        else
+        {
+            return (int)Direction+1;
+        }
+    }
 }

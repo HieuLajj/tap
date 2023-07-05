@@ -19,15 +19,15 @@ public class Test : MonoBehaviour
     public int[] arrayxyz;
     private string[] numbers;
     public string[] lines;
-    private void Start()
-    {
-        LoaddataFromLocal();
-        Edittext(lines[8]);
-        pretransform.localPosition = new Vector3((float)arrayxyz[1]/2, (float)arrayxyz[2]/2, (float)arrayxyz[0]/2);
-        Camera.main.transform.position = new Vector3((float)arrayxyz[1] / 2, (float)arrayxyz[2] / 2, -10);
-        // Debug.Log((float)arrayxyz[0]+"=="+(float)arrayxyz[2]+"=="+ (float)arrayxyz[1]);
-        CreateMap();
-    }
+    //private void Start()
+    //{
+    //    LoaddataFromLocal();
+    //    Edittext(lines[8]);
+    //    pretransform.localPosition = new Vector3((float)arrayxyz[1]/2, (float)arrayxyz[2]/2, (float)arrayxyz[0]/2);
+    //    Camera.main.transform.position = new Vector3((float)arrayxyz[1] / 2, (float)arrayxyz[2] / 2, -10);
+    //    // Debug.Log((float)arrayxyz[0]+"=="+(float)arrayxyz[2]+"=="+ (float)arrayxyz[1]);
+    //    CreateMap();
+    //}
  
     public void Tests()
     {
