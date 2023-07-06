@@ -8,6 +8,7 @@ public enum StateGame
     AWAIT,
     AWAITLOAD,
     PLAY,
+    WIN
 }
 public class Controller : Singleton<Controller>
 {
@@ -21,6 +22,10 @@ public class Controller : Singleton<Controller>
     public int amountNumberBlock = 0;
     public int checkloadBlock = 0;
     private StateGame stateGame = StateGame.AWAIT;
+
+
+    //test
+    public GameObject WinEffect;
     public StateGame gameState
     {
         get
@@ -30,6 +35,10 @@ public class Controller : Singleton<Controller>
         set
         {
             stateGame = value;
+            if(value == StateGame.WIN)
+            {
+                WhenWin();
+            }
         }
     }
 
@@ -84,27 +93,37 @@ public class Controller : Singleton<Controller>
             timer += Time.deltaTime;
             if (timer > 0.15f)
             {
-                manager.Ok();
+                manager.SwipeScreen();
             }
         }
         if (Input.GetMouseButtonUp(0))
         {
             if (timer <= 0.15f)
             {
-                screenPosition = Input.mousePosition;
-                Ray ray = Camera.main.ScreenPointToRay(screenPosition);
+                
+                    screenPosition = Input.mousePosition;
+                    Ray ray = Camera.main.ScreenPointToRay(screenPosition);
 
-                if (Physics.Raycast(ray, out RaycastHit hitData, Mathf.Infinity, 1 << 6))
-                {
+                    if (Physics.Raycast(ray, out RaycastHit hitData, Mathf.Infinity, 1 << 6))
+                    {
 
-                    Block block = hitData.collider.GetComponentInParent<Block>();
-                    block.checkRay();
+                        Block block = hitData.collider.GetComponentInParent<Block>();
+                        block.checkRay();
 
-                }
+                    }
+                
             }
             timer = 0;
         }
     }
 
-   
+    private void WhenWin()
+    {
+        LevelManager.Instance.ClearDataSaveGame();
+        //WinEffect.SetActive(true);
+        LevelManager.Instance.NextLevel();
+    }
+
+
+
 }

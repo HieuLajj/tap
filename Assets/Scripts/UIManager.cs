@@ -14,7 +14,7 @@ public class UIManager : MonoBehaviour
     {
     }
 
-    public void Ok()
+    public void SwipeScreen()
     {
         lookAt.x = Mathf.Lerp(lookAt.x, -touchpad.LookInput().x, 25 * Time.deltaTime);
         lookAt.y = Mathf.Lerp(lookAt.y, touchpad.LookInput().y, 25 * Time.deltaTime);

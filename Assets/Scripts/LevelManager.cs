@@ -8,7 +8,6 @@ using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
 using UnityEngine.UIElements;
 using DG.Tweening.Core.Easing;
 using System.Linq;
-using static Unity.Collections.AllocatorManager;
 
 [System.Serializable]
 public class LevelData
@@ -22,7 +21,20 @@ public class LevelManager : Singleton<LevelManager>
     public Transform pretransform;
     public Transform temporarymain;
     public GameObject PrefabsObject;
-    public static int LevelIDInt;
+    private int levelInt;
+    public int LevelIDInt
+    {
+        get
+        {
+            return levelInt;
+        }
+        set
+        {
+            levelInt = value;
+            PlayerPrefs.SetInt("Playinglevel", levelInt);
+        }
+    }
+
     public Vector3 statusLevel;
 
     private string[] linesLevel;
@@ -41,14 +53,15 @@ public class LevelManager : Singleton<LevelManager>
         // Debug.Log((float)arrayxyz[0]+"=="+(float)arrayxyz[2]+"=="+ (float)arrayxyz[1]);
         if (CheckSaveGame())
         {
-            Edittext(linesLevel[LevelIDInt - 1]);
+            Edittext(linesLevel[levelInt - 1]);
             pretransform.localPosition = new Vector3(statusLevel.x / 2, (float)statusLevel.y / 2, (float)statusLevel.z / 2);
-            Camera.main.transform.position = new Vector3((float)statusLevel.x / 2, (float)statusLevel.y / 2, -10);
+            Camera.main.transform.position = new Vector3((float)statusLevel.x / 2, (float)statusLevel.y / 2, -15);
             CreateMapToSave();
         }
         else
         {
-            CreateMap();
+            LoadLevelInGame( Mathf.Clamp(PlayerPrefs.GetInt("Playinglevel"),1,1000));
+            //CreateMap();
         }
     }
     public void LoadLevelInGame(int level)
@@ -58,7 +71,7 @@ public class LevelManager : Singleton<LevelManager>
         Edittext(linesLevel[level - 1]);
         LevelIDInt = level;
         pretransform.localPosition = new Vector3(statusLevel.x / 2, (float)statusLevel.y / 2, (float)statusLevel.z / 2);
-        Camera.main.transform.position = new Vector3((float)statusLevel.x / 2, (float)statusLevel.y / 2, -10);
+        Camera.main.transform.position = new Vector3((float)statusLevel.x / 2, (float)statusLevel.y / 2, -15);
         CreateMap();      
     }
     public void LoaddataFromLocal()
@@ -96,6 +109,7 @@ public class LevelManager : Singleton<LevelManager>
 
     public void CreateMap()
     {
+        Controller.Instance.ListenerBlock.Clear();
         Controller.Instance.amountNumberBlock = 0;
         Controller.Instance.gameState = StateGame.AWAITLOAD;
         Controller.Instance.checkloadBlock = 0;
@@ -149,6 +163,7 @@ public class LevelManager : Singleton<LevelManager>
         //Debug.Log(statusLevel.x+"load truong hoop 2" + statusLevel.y);
         flag = 0;
         flag2 = 0;
+        Controller.Instance.ListenerBlock.Clear();
         Controller.Instance.amountNumberBlock = 0;
         Controller.Instance.checkloadBlock = 0;
         Controller.Instance.gameState = StateGame.AWAITLOAD;
@@ -199,17 +214,21 @@ public class LevelManager : Singleton<LevelManager>
     public void SaveGame(int[] arraydir)
     {
         LevelData levelData = new LevelData();
-        levelData.LevelID = LevelIDInt;
+        levelData.LevelID = levelInt;
         levelData.statusID = statusLevel;
         levelData.arrayDir = arraydir;
+        string file = Application.dataPath + "/Data/level.json";
         if (levelData.arrayDir.Length > 0)
         {
             string json = JsonUtility.ToJson(levelData);
-            string file = Application.dataPath + "/Data/level.json";
             File.WriteAllText(file, json);
             //Debug.Log(file);
         }
         //Debug.Log("??"+ arraydir.Length);
+    }
+    public void ClearDataSaveGame()
+    {
+        File.WriteAllText(Application.dataPath + "/Data/level.json", "");
     }
 
     public bool CheckSaveGame()
@@ -217,11 +236,12 @@ public class LevelManager : Singleton<LevelManager>
         string json = File.ReadAllText(Application.dataPath + "/Data/level.json");
         if (json == "" || json == null)
         {
-            Debug.Log("ko co giu lieu");
+           // Debug.Log("ko co giu lieu");
             return false;
         }
         else
         {
+           // Debug.Log("co du lieu");
             LevelData leveldata = JsonUtility.FromJson<LevelData>(json);
             LevelIDInt = leveldata.LevelID;
             statusLevel = leveldata.statusID;
@@ -257,5 +277,25 @@ public class LevelManager : Singleton<LevelManager>
             child.gameObject.SetActive(false);
         }
     }
-    
+
+    public void CheckWin()
+    {
+        for (int i = 0; i < pretransform.childCount; i++)
+        {
+            if (pretransform.GetChild(i).gameObject.activeInHierarchy)
+            {
+                return;
+            }
+        }
+        Controller.Instance.gameState = StateGame.WIN;
+    }
+
+    public void NextLevel()
+    {
+        LevelIDInt++;
+        //PlayerPrefs.SetInt("Playinglevel", levelInt);
+        LoadLevelInGame(levelInt);
+    }
+
+
 }

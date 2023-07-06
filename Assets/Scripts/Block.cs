@@ -9,7 +9,6 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.UIElements;
-using static Unity.Collections.AllocatorManager;
 using Random = UnityEngine.Random;
 
 public enum DirectionBlock
@@ -58,7 +57,7 @@ public class Block : MonoBehaviour, IListenerBlock
             checkDirection();
             if (Physics.Raycast(transform.position, dir, out hit, Mathf.Infinity, 1 << 6))
             {
-                Block blockcheck = hit.collider.GetComponentInParent<Block>();
+                Block blockcheck = hit.collider.GetComponent<Block>();
                 if (!blockcheck.statusBlock)
                 {
                     RunBlock();
@@ -82,27 +81,50 @@ public class Block : MonoBehaviour, IListenerBlock
 
     public void RunAwaitBack(Vector3 dircheck, Vector3 animationdir)
     {
-     
-            animationback = false;
-            Vector3 originalPosition = transform.localPosition;
-            Vector3 targetPosition = originalPosition + animationdir * 0.2f;
-            transform.DOLocalMove(targetPosition, 0.2f).OnComplete(() =>
+
+            if (animationback == true)
             {
-      
-                if (Physics.Raycast(transform.position, dircheck, out hit, Mathf.Infinity, 1 << 6))
+                animationback = false;
+                Vector3 originalPosition = ModelBlock.transform.localPosition;
+                Vector3 targetPosition = originalPosition + animationdir * 0.2f;
+                ModelBlock.transform.DOLocalMove(targetPosition, 0.2f).OnComplete(() =>
                 {
-                    Block blockdir = hit.collider.GetComponentInParent<Block>();
-                    if(hit.distance < 1)
+
+                    if (Physics.Raycast(transform.position, dircheck, out hit, Mathf.Infinity, 1 << 6))
                     {
-                        blockdir.RunAwaitBack(dircheck, animationdir);
+                        Block blockdir = hit.collider.GetComponent<Block>();
+                        if (hit.distance < 1)
+                        {
+                            blockdir.RunAwaitBack(dircheck, animationdir);
+                        }
                     }
-                }         
-                transform.DOLocalMove(originalPosition, 0.2f).OnComplete(() =>
-                {
-                    animationback = true;
+                    ModelBlock.transform.DOLocalMove(originalPosition, 0.2f).OnComplete(() =>
+                    {
+                        animationback = true;
+                    });
                 });
-            });
-        
+            }
+           
+        //animationback = false;
+        //Vector3 originalPosition = transform.localPosition;
+        //Vector3 targetPosition = originalPosition + animationdir * 0.2f;
+        //transform.DOLocalMove(targetPosition, 0.2f).OnComplete(() =>
+        //{
+
+        //    if (Physics.Raycast(transform.position, dircheck, out hit, Mathf.Infinity, 1 << 6))
+        //    {
+        //        Block blockdir = hit.collider.GetComponent<Block>();
+        //        if(hit.distance < 1)
+        //        {
+        //            blockdir.RunAwaitBack(dircheck, animationdir);
+        //        }
+        //    }         
+        //    transform.DOLocalMove(originalPosition, 0.2f).OnComplete(() =>
+        //    {
+        //        animationback = true;
+        //    });
+        //});
+
     }
 
     public void RunAwait2(Block b)
@@ -120,17 +142,31 @@ public class Block : MonoBehaviour, IListenerBlock
         //        });
         //    });
         //}
-       
-        Vector3 originalPosition = ModelBlock.transform.localPosition;
-        b.transform.parent = transform;
-        Vector3 targetPosition = b.transform.localPosition - dir2;
-        ModelBlock.gameObject.transform.DOLocalMove(targetPosition, 0.5f).OnComplete(() =>
+        if (animationback == true)
         {
-            ModelBlock.gameObject.transform.DOLocalMove(originalPosition, 0.5f).OnComplete(() =>
+            animationback = false;
+            Vector3 originalPosition = ModelBlock.transform.localPosition;
+
+            Vector3 targetPosition = transform.InverseTransformPoint(b.transform.position) - dir2;
+            ModelBlock.gameObject.transform.DOLocalMove(targetPosition, 0.5f).OnComplete(() =>
             {
-                animationback = true;
+                ModelBlock.gameObject.transform.DOLocalMove(originalPosition, 0.5f).OnComplete(() =>
+                {
+                    animationback = true;
+                });
             });
-        });
+        }
+        //giai phap 1
+        //Vector3 originalPosition = ModelBlock.transform.localPosition;
+        //b.transform.parent = transform;
+        //Vector3 targetPosition = b.transform.localPosition - dir2;
+        //ModelBlock.gameObject.transform.DOLocalMove(targetPosition, 0.5f).OnComplete(() =>
+        //{
+        //    ModelBlock.gameObject.transform.DOLocalMove(originalPosition, 0.5f).OnComplete(() =>
+        //    {
+        //        animationback = true;
+        //    });
+        //});
     }
 
 
@@ -150,6 +186,8 @@ public class Block : MonoBehaviour, IListenerBlock
             yield return null;
         }
         gameObject.SetActive(false);
+        LevelManager.Instance.CheckWin();
+
     }
     public void MoveBlock()
     {
@@ -158,7 +196,7 @@ public class Block : MonoBehaviour, IListenerBlock
     public void MoveToDestination()
     {
         startRotation = transform.rotation;
-        startScale = transform.localScale;
+        startScale = new Vector3(1,1,1);
         randomScale = Random.Range(0.5f, 2f);
         transform.localScale = new Vector3(randomScale, randomScale, randomScale);
         transform.rotation = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
