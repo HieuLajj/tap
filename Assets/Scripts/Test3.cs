@@ -1,21 +1,28 @@
 using DG.Tweening;
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Test3 : MonoBehaviour
+public class Test3 : Singleton<Test3>
 {
-    public Vector3 targetPosition;
-    public float moveDuration = 0.2f;
-
-    void Start()
+    public GameObject PrefabsGift;
+    private void Update()
     {
-        Vector3 originalPosition = transform.position;
-        targetPosition = originalPosition + transform.up * 1;
-        transform.DOMove(targetPosition, moveDuration).OnComplete(() =>
+       
+        if (Input.GetKeyDown(KeyCode.K))
         {
-            transform.DOMove(originalPosition, moveDuration);
-        });
-        Debug.Log("DFdfds"+ targetPosition);
+            // Debug.Log("Space key was pressed.");
+            GameObject g = LevelManager.Instance.pretransform.GetChild(0).gameObject;
+            //GameObject t = Instantiate(PrefabsGift, g.transform.position, g.transform.rotation, g.transform);
+            //t.transform.localScale = new Vector3(0,0,0);
+            //t.transform.DOScale(0.5f, 1).OnComplete(() =>
+            //{
+            //    t.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            //});
+            Block block = g.GetComponent<Block>();
+            block.StatusBlock = StatusBlock.Gift;
+           // block.ModelBlock.SetActive(false);
+        }
     }
 }

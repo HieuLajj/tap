@@ -145,7 +145,7 @@ public class LevelManager : Singleton<LevelManager>
                         blockscript.GetDirectionBlock(arraydata[flag]);
                         blockscript.Crack();
                         blockscript.MoveBlock();
-                        blockscript.statusBlock = true;
+                        blockscript.StatusBlock = StatusBlock.Normal;
                         AddListenerBlock(blockscript);
 
                         Controller.Instance.amountNumberBlock++;
@@ -178,10 +178,17 @@ public class LevelManager : Singleton<LevelManager>
                     {
                         GameObject block = Instantiate(PrefabsObject, new Vector3(j + 0.5f, i + 0.5f, g + 0.5f), Quaternion.identity, pretransform);
                         Block blockscript = block.GetComponent<Block>();
-                        if (arrayDir[flag2] != -1)
+                        int arrayflag = arrayDir[flag2];
+                        if (arrayflag != -1)
                         {
-                           
-                            blockscript.GetDirectionBlock(arrayDir[flag2]);
+                            if (arrayflag==9)
+                            {
+                                blockscript.StatusBlock = StatusBlock.Gift;
+                            }
+                            else
+                            {
+                                blockscript.GetDirectionBlock(arrayflag);
+                            }
                             blockscript.Crack();
                             blockscript.MoveBlock();
                             Controller.Instance.amountNumberBlock ++;

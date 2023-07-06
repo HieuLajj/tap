@@ -1,7 +1,8 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Xml.Linq;
 using TMPro;
 using Unity.VisualScripting;
@@ -9,6 +10,7 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.UIElements;
+using static UnityEngine.UISystemProfilerApi;
 using Random = UnityEngine.Random;
 
 public enum DirectionBlock
@@ -19,6 +21,13 @@ public enum DirectionBlock
     Forward,
     Left,
     Right,
+}
+
+public enum StatusBlock
+{
+    Die,
+    Normal,
+    Gift
 }
 public class Block : MonoBehaviour, IListenerBlock
 {
@@ -36,13 +45,84 @@ public class Block : MonoBehaviour, IListenerBlock
     private Vector3 dir2;
 
     private bool animationback = true;
-    public bool statusBlock = true;
-
     public GameObject ModelBlock;
- 
+    GameObject trail;
+    GameObject gift;
+    //public bool statusBlock = true;
+    private StatusBlock statusBlock = StatusBlock.Normal;
+    public StatusBlock StatusBlock
+    {
+        set { 
+            statusBlock = value;
+            if(statusBlock == StatusBlock.Gift)
+            {
+                gift = GiftPooling.Instance.GetGift();
+                gift.transform.localScale = new Vector3(0, 0, 0);
+                gift.transform.DOScale(0.5f, 1).OnComplete(() =>
+                {
+                    gift.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+                });
+                //gift.transform.localRotation = transform.localRotation;
+                //gift.transform.DOLocalRotate(new Vector3(0, 360, 0), 1f, RotateMode.FastBeyond360).OnComplete(() =>
+                //{
+                //    gift.transform.localRotation = transform.localRotation;
+                //});
+                gift.transform.parent = transform;
+                gift.transform.rotation = transform.rotation;
+                gift.transform.position = transform.position;
+
+                //GameObject t = Instantiate(Test3.Instance.PrefabsGift, transform.position, transform.rotation, transform);
+                //t.transform.localScale = new Vector3(0, 0, 0);
+                //t.transform.DOScale(0.5f, 1).OnComplete(() =>
+                //{
+                //    t.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+                //});
+
+                ModelBlock.SetActive(false);
+            }
+            else
+            {
+                if (!ModelBlock.activeInHierarchy)
+                {
+                    ModelBlock.SetActive(true);
+                }
+                if (gift != null)
+                {
+                    gift.SetActive(false);
+                    gift.transform.parent = GiftPooling.Instance.transform;
+                    gift = null;
+                    if (!ModelBlock.activeInHierarchy)
+                    {
+                        ModelBlock.SetActive(true);
+                    }
+                }
+            }
+        }
+        get {
+            return statusBlock;
+        }
+    }
+
     private void OnEnable()
     {
         endPosition = transform.position;
+        if (trail != null)
+        {
+            trail.SetActive(false);
+            trail.transform.parent = TrailPooling.Instance.transform;
+            trail = null;
+        }
+
+        if(gift != null && statusBlock == StatusBlock.Normal)
+        {
+            gift.SetActive(false);
+            gift.transform.parent = GiftPooling.Instance.transform;
+            gift = null;
+            if (!ModelBlock.activeInHierarchy)
+            {
+                ModelBlock.SetActive(true);
+            }
+        }
     }
    
     //public void SetEndPosition(Vector3 poi2)
@@ -50,6 +130,40 @@ public class Block : MonoBehaviour, IListenerBlock
     //    endPosition = poi2;
     //    Debug.Log(endPosition + "cothaydoi");
     //}
+
+    //kiem tra no la qua hay hop binh thuong
+    public void checkRayInput()
+    {
+        if(statusBlock == StatusBlock.Normal)
+        {
+            checkRay();
+        }
+        else if (statusBlock == StatusBlock.Gift)
+        {
+            MoveGift();          
+        }
+    }
+
+    private void MoveGift()
+    {
+        StartCoroutine(IMoveGift());
+    }
+    public IEnumerator IMoveGift()
+    {
+        transform.parent = LevelManager.Instance.temporarymain;
+        QuadraticCurve.Instance.A.position = transform.position;
+        float sampleTime = 0f;
+        transform.position = QuadraticCurve.Instance.evaluate(sampleTime);
+        transform.DORotate(new Vector3(-40, 0, 0), 1f, RotateMode.FastBeyond360);
+        while (sampleTime <= 1f)
+        {
+            sampleTime += Time.deltaTime;
+            transform.position = QuadraticCurve.Instance.evaluate(sampleTime);
+            //transform.forward = QuadraticCurve.Instance.evaluate(sampleTime + 0.001f) - transform.position;
+            yield return null;
+        }
+        transform.position = QuadraticCurve.Instance.evaluate(1);
+    }
     public void checkRay()
     {
         if (animationback == true)
@@ -58,7 +172,7 @@ public class Block : MonoBehaviour, IListenerBlock
             if (Physics.Raycast(transform.position, dir, out hit, Mathf.Infinity, 1 << 6))
             {
                 Block blockcheck = hit.collider.GetComponent<Block>();
-                if (!blockcheck.statusBlock)
+                if (blockcheck.statusBlock == StatusBlock.Die)
                 {
                     RunBlock();
                     return;
@@ -78,6 +192,7 @@ public class Block : MonoBehaviour, IListenerBlock
             }
         }
     }
+   
 
     public void RunAwaitBack(Vector3 dircheck, Vector3 animationdir)
     {
@@ -85,9 +200,10 @@ public class Block : MonoBehaviour, IListenerBlock
             if (animationback == true)
             {
                 animationback = false;
+                
                 Vector3 originalPosition = ModelBlock.transform.localPosition;
                 Vector3 targetPosition = originalPosition + animationdir * 0.2f;
-                ModelBlock.transform.DOLocalMove(targetPosition, 0.2f).OnComplete(() =>
+                ModelBlock.transform.DOLocalMove(targetPosition, 0.15f).OnComplete(() =>
                 {
 
                     if (Physics.Raycast(transform.position, dircheck, out hit, Mathf.Infinity, 1 << 6))
@@ -98,33 +214,12 @@ public class Block : MonoBehaviour, IListenerBlock
                             blockdir.RunAwaitBack(dircheck, animationdir);
                         }
                     }
-                    ModelBlock.transform.DOLocalMove(originalPosition, 0.2f).OnComplete(() =>
+                    ModelBlock.transform.DOLocalMove(originalPosition, 0.15f).OnComplete(() =>
                     {
                         animationback = true;
                     });
                 });
-            }
-           
-        //animationback = false;
-        //Vector3 originalPosition = transform.localPosition;
-        //Vector3 targetPosition = originalPosition + animationdir * 0.2f;
-        //transform.DOLocalMove(targetPosition, 0.2f).OnComplete(() =>
-        //{
-
-        //    if (Physics.Raycast(transform.position, dircheck, out hit, Mathf.Infinity, 1 << 6))
-        //    {
-        //        Block blockdir = hit.collider.GetComponent<Block>();
-        //        if(hit.distance < 1)
-        //        {
-        //            blockdir.RunAwaitBack(dircheck, animationdir);
-        //        }
-        //    }         
-        //    transform.DOLocalMove(originalPosition, 0.2f).OnComplete(() =>
-        //    {
-        //        animationback = true;
-        //    });
-        //});
-
+            }         
     }
 
     public void RunAwait2(Block b)
@@ -148,9 +243,9 @@ public class Block : MonoBehaviour, IListenerBlock
             Vector3 originalPosition = ModelBlock.transform.localPosition;
 
             Vector3 targetPosition = transform.InverseTransformPoint(b.transform.position) - dir2;
-            ModelBlock.gameObject.transform.DOLocalMove(targetPosition, 0.5f).OnComplete(() =>
+            ModelBlock.gameObject.transform.DOLocalMove(targetPosition, 0.3f).OnComplete(() =>
             {
-                ModelBlock.gameObject.transform.DOLocalMove(originalPosition, 0.5f).OnComplete(() =>
+                ModelBlock.gameObject.transform.DOLocalMove(originalPosition, 0.3f).OnComplete(() =>
                 {
                     animationback = true;
                 });
@@ -172,21 +267,35 @@ public class Block : MonoBehaviour, IListenerBlock
 
     public void RunBlock()
     {
-        statusBlock = false;
+        statusBlock = StatusBlock.Die;
         checkDirection();
         transform.parent = LevelManager.Instance.temporarymain;
         StartCoroutine(Run(transform.TransformDirection(dir2)));
     }
-    IEnumerator Run(Vector3 bb)
+    IEnumerator Run(Vector3 direction)
     {
-        
+        trail =  TrailPooling.Instance.GetTrail();
+        if (trail != null)
+        {
+            trail.transform.position = transform.position;
+            trail.transform.parent = transform;
+            trail.SetActive(true);
+        }
+
+
         for (float alpha = 20f; alpha >= 0; alpha -= 0.1f)
         {
-            transform.Translate(bb* 10 * Time.deltaTime, Space.World);
+            transform.Translate(direction * 10 * Time.deltaTime, Space.World);
             yield return null;
+        }
+        if(trail != null)
+        {
+            trail.SetActive(false);
+            trail.transform.parent = TrailPooling.Instance.transform;
         }
         gameObject.SetActive(false);
         LevelManager.Instance.CheckWin();
+
 
     }
     public void MoveBlock()
@@ -323,6 +432,10 @@ public class Block : MonoBehaviour, IListenerBlock
 
     public int IType()
     {
+        if(statusBlock== StatusBlock.Gift)
+        {
+            return 9;
+        }
         if (!gameObject.activeInHierarchy)
         {
             return -1;

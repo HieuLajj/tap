@@ -107,8 +107,8 @@ public class Controller : Singleton<Controller>
                     if (Physics.Raycast(ray, out RaycastHit hitData, Mathf.Infinity, 1 << 6))
                     {
 
-                        Block block = hitData.collider.GetComponentInParent<Block>();
-                        block.checkRay();
+                        Block block = hitData.collider.GetComponent<Block>();
+                        block.checkRayInput();
 
                     }
                 
