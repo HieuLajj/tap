@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UIManager : MonoBehaviour
+public class UIManager : Singleton<UIManager>
 {
     public Touchpad touchpad;
     public GameObject parent;
@@ -10,9 +10,9 @@ public class UIManager : MonoBehaviour
     public Transform CameraMain;
     private float currentVelocity;
     private Vector2 lookAt;
-    private void Update()
-    {
-    }
+    public InGameUI GameUIIngame;
+    public Block BlockGiftPresent;
+
 
     public void SwipeScreen()
     {

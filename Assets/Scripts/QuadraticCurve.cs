@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,7 +8,7 @@ public class QuadraticCurve : Singleton<QuadraticCurve>
     public Transform A;
     public Transform B;
     public Transform Control;
-
+    public Transform PreCameraPosition;
     public Vector3 evaluate(float t)
     {
         Vector3 ac = Vector3.Lerp(A.position, Control.position, t);
@@ -22,5 +23,10 @@ public class QuadraticCurve : Singleton<QuadraticCurve>
         {
             Gizmos.DrawWireSphere(evaluate(i / 20f), 0.1f);
         }
+    }
+
+    public void ClearPositionB()
+    {
+       B.transform.position = PreCameraPosition.position;
     }
 }

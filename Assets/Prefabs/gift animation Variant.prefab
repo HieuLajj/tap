@@ -52,9 +52,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5709612413769676989, guid: c0f2605ba74473d4b916ad56fdb7fc68, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: -5175481620872875968, guid: c0f2605ba74473d4b916ad56fdb7fc68, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: -0.00015640259
+      objectReference: {fileID: 0}
+    - target: {fileID: -5040857339625445787, guid: c0f2605ba74473d4b916ad56fdb7fc68, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: -783818540233046823, guid: c0f2605ba74473d4b916ad56fdb7fc68, type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -67,6 +75,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: c0f2605ba74473d4b916ad56fdb7fc68, type: 3}
       propertyPath: m_Name
       value: gift animation Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: c0f2605ba74473d4b916ad56fdb7fc68, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1411210529612802447, guid: c0f2605ba74473d4b916ad56fdb7fc68, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -84,8 +96,56 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: b83fbd41e52611d4487b2b3cb2746106, type: 2}
+    - target: {fileID: 7562918099949655345, guid: c0f2605ba74473d4b916ad56fdb7fc68, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c0f2605ba74473d4b916ad56fdb7fc68, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6349394974208726911}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c0f2605ba74473d4b916ad56fdb7fc68, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7068552471487740832}
   m_SourcePrefab: {fileID: 100100000, guid: c0f2605ba74473d4b916ad56fdb7fc68, type: 3}
+--- !u!1 &7332892494335198238 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c0f2605ba74473d4b916ad56fdb7fc68, type: 3}
+  m_PrefabInstance: {fileID: 7566824791667603791}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &6349394974208726911
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7332892494335198238}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 2d7794263a0e53243bf884121c30847f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 1
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7068552471487740832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7332892494335198238}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9461bbab68e1ab24ab2013fcfcc5b913, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

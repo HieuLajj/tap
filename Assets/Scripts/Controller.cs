@@ -73,16 +73,25 @@ public class Controller : Singleton<Controller>
     {
         int i = 0;
         int[] arraytest = new int[ListenerBlock.Count];
+
+        // kiem tra xem mang co toan -1 hay khong
+        bool checkminus1 = false;
         foreach(var item in ListenerBlock)
         {
             arraytest[i] = item.IType();
+            if (arraytest[i] != -1 && !checkminus1) {
+                checkminus1 = true;
+            }
             i++;
         }
-        //for(int j=0; j<arraytest.Length; j++)
-        //{
-        //    Debug.Log(arraytest[j]);
-        //}
-        LevelManager.Instance.SaveGame(arraytest);  
+        if (checkminus1)
+        {
+            LevelManager.Instance.SaveGame(arraytest);
+        }
+        else
+        {
+            LevelManager.Instance.ClearDataSaveGame();
+        }
     }
 
     

@@ -8,6 +8,7 @@ using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
 using UnityEngine.UIElements;
 using DG.Tweening.Core.Easing;
 using System.Linq;
+using DG.Tweening;
 
 [System.Serializable]
 public class LevelData
@@ -44,6 +45,11 @@ public class LevelManager : Singleton<LevelManager>
     private int flag2 = 0;
     public int[] arrayDir;
     private int childCountParent;
+
+    private void Awake()
+    {
+        DOTween.SetTweensCapacity(10000, 10000);
+    }
     private void Start()
     {
         LoaddataFromLocal();
@@ -55,7 +61,7 @@ public class LevelManager : Singleton<LevelManager>
         {
             Edittext(linesLevel[levelInt - 1]);
             pretransform.localPosition = new Vector3(statusLevel.x / 2, (float)statusLevel.y / 2, (float)statusLevel.z / 2);
-            Camera.main.transform.position = new Vector3((float)statusLevel.x / 2, (float)statusLevel.y / 2, -15);
+            Camera.main.transform.position = new Vector3((float)statusLevel.x / 2, (float)statusLevel.y / 2, ReturnyCamera(levelInt));
             CreateMapToSave();
         }
         else
@@ -71,7 +77,7 @@ public class LevelManager : Singleton<LevelManager>
         Edittext(linesLevel[level - 1]);
         LevelIDInt = level;
         pretransform.localPosition = new Vector3(statusLevel.x / 2, (float)statusLevel.y / 2, (float)statusLevel.z / 2);
-        Camera.main.transform.position = new Vector3((float)statusLevel.x / 2, (float)statusLevel.y / 2, -15);
+        Camera.main.transform.position = new Vector3((float)statusLevel.x / 2, (float)statusLevel.y / 2, ReturnyCamera(levelInt));
         CreateMap();      
     }
     public void LoaddataFromLocal()
@@ -231,6 +237,10 @@ public class LevelManager : Singleton<LevelManager>
             File.WriteAllText(file, json);
             //Debug.Log(file);
         }
+        else
+        {
+            ClearDataSaveGame();
+        }
         //Debug.Log("??"+ arraydir.Length);
     }
     public void ClearDataSaveGame()
@@ -304,5 +314,60 @@ public class LevelManager : Singleton<LevelManager>
         LoadLevelInGame(levelInt);
     }
 
+    public GameObject GetRandomActiveChild()
+    {
+        List<GameObject> activeChildren = new List<GameObject>();
 
+        foreach (Transform child in pretransform.transform)
+        {
+            if (child.gameObject.activeInHierarchy)
+            {
+                activeChildren.Add(child.gameObject);
+            }
+        }
+
+        if (activeChildren.Count > 0)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, activeChildren.Count);
+            return activeChildren[randomIndex];
+        }
+
+        return null;
+    }
+
+    public GameObject GetRandomGift()
+    {
+        List<GameObject> activeChildren = new List<GameObject>();
+
+        foreach (Transform child in pretransform.transform)
+        {
+            if (child.gameObject.activeInHierarchy && child.gameObject.GetComponent<Block>().gift == null)
+            {
+                activeChildren.Add(child.gameObject);
+            }
+        }
+
+        if (activeChildren.Count > 0)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, activeChildren.Count);
+            return activeChildren[randomIndex];
+        }
+
+        return null;
+    }
+
+    public int ReturnyCamera(int index)
+    {
+        if (index < 20)
+        {
+            return -15;
+        }else if(index < 100)
+        {
+            return -20;
+        }
+        else
+        {
+            return -25;
+        }
+    }
 }

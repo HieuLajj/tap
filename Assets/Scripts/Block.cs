@@ -47,7 +47,8 @@ public class Block : MonoBehaviour, IListenerBlock
     private bool animationback = true;
     public GameObject ModelBlock;
     GameObject trail;
-    GameObject gift;
+    public GameObject gift;
+
     //public bool statusBlock = true;
     private StatusBlock statusBlock = StatusBlock.Normal;
     public StatusBlock StatusBlock
@@ -146,12 +147,17 @@ public class Block : MonoBehaviour, IListenerBlock
 
     private void MoveGift()
     {
+        Controller.Instance.gameState = StateGame.AWAIT;
+        UIManager.Instance.GameUIIngame.UIGift.SetActive(true);
+        UIManager.Instance.BlockGiftPresent = this;
+
         StartCoroutine(IMoveGift());
     }
     public IEnumerator IMoveGift()
     {
         transform.parent = LevelManager.Instance.temporarymain;
         QuadraticCurve.Instance.A.position = transform.position;
+        QuadraticCurve.Instance.ClearPositionB();
         float sampleTime = 0f;
         transform.position = QuadraticCurve.Instance.evaluate(sampleTime);
         transform.DORotate(new Vector3(-40, 0, 0), 1f, RotateMode.FastBeyond360);
@@ -200,25 +206,49 @@ public class Block : MonoBehaviour, IListenerBlock
             if (animationback == true)
             {
                 animationback = false;
-                
-                Vector3 originalPosition = ModelBlock.transform.localPosition;
-                Vector3 targetPosition = originalPosition + animationdir * 0.2f;
-                ModelBlock.transform.DOLocalMove(targetPosition, 0.15f).OnComplete(() =>
-                {
 
-                    if (Physics.Raycast(transform.position, dircheck, out hit, Mathf.Infinity, 1 << 6))
+                if (statusBlock == StatusBlock.Normal)
+                {
+                    Vector3 originalPosition = ModelBlock.transform.localPosition;
+                    Vector3 targetPosition = originalPosition + animationdir * 0.2f;
+                    ModelBlock.transform.DOLocalMove(targetPosition, 0.15f).OnComplete(() =>
                     {
-                        Block blockdir = hit.collider.GetComponent<Block>();
-                        if (hit.distance < 1)
+
+                        if (Physics.Raycast(transform.position, dircheck, out hit, Mathf.Infinity, 1 << 6))
                         {
-                            blockdir.RunAwaitBack(dircheck, animationdir);
+                            Block blockdir = hit.collider.GetComponent<Block>();
+                            if (hit.distance < 1)
+                            {
+                                blockdir.RunAwaitBack(dircheck, animationdir);
+                            }
                         }
-                    }
-                    ModelBlock.transform.DOLocalMove(originalPosition, 0.15f).OnComplete(() =>
-                    {
-                        animationback = true;
+                        ModelBlock.transform.DOLocalMove(originalPosition, 0.15f).OnComplete(() =>
+                        {
+                            animationback = true;
+                        });
                     });
-                });
+                }
+                else
+                {
+                    Vector3 originalPosition = gift.transform.localPosition;
+                    Vector3 targetPosition = originalPosition + animationdir * 0.2f;
+                    gift.transform.DOLocalMove(targetPosition, 0.15f).OnComplete(() =>
+                    {
+
+                        if (Physics.Raycast(transform.position, dircheck, out hit, Mathf.Infinity, 1 << 6))
+                        {
+                            Block blockdir = hit.collider.GetComponent<Block>();
+                            if (hit.distance < 1)
+                            {
+                                blockdir.RunAwaitBack(dircheck, animationdir);
+                            }
+                        }
+                        gift.transform.DOLocalMove(originalPosition, 0.15f).OnComplete(() =>
+                        {
+                            animationback = true;
+                        });
+                    });
+                }
             }         
     }
 
@@ -245,6 +275,12 @@ public class Block : MonoBehaviour, IListenerBlock
             Vector3 targetPosition = transform.InverseTransformPoint(b.transform.position) - dir2;
             ModelBlock.gameObject.transform.DOLocalMove(targetPosition, 0.3f).OnComplete(() =>
             {
+
+                if (Physics.Raycast(transform.position, dir, out hit, Mathf.Infinity, 1 << 6))
+                {
+                    Block blockdir = hit.collider.GetComponent<Block>();
+                    blockdir.RunAwaitBack(dir, dir2);                  
+                }
                 ModelBlock.gameObject.transform.DOLocalMove(originalPosition, 0.3f).OnComplete(() =>
                 {
                     animationback = true;
@@ -430,9 +466,26 @@ public class Block : MonoBehaviour, IListenerBlock
         startPosition = transform.position;
     }
 
+    public void FlyBoomed()
+    {
+        Vector3 direction = (transform.position - transform.parent.position).normalized;
+        Vector3 targetPosition = transform.position + direction * 5;
+        //transform.parent = LevelManager.Instance.temporarymain;
+        //Vector3 direction = (transform.position - transform.parent.position).normalized;
+        //direction.y += Random.Range(3f, 5f); // Thêm thành phần theo chiều dọc
+        //direction = direction.normalized;
+        //Vector3 targetPosition = transform.position + direction * Random.Range(3f, 5f);
+
+        transform.DOMove(targetPosition, 2f).SetEase(Ease.OutQuad).OnComplete(() =>
+        {
+            gameObject.SetActive(false);
+            LevelManager.Instance.CheckWin();
+        });
+    }
+
     public int IType()
     {
-        if(statusBlock== StatusBlock.Gift)
+        if(statusBlock== StatusBlock.Gift && gameObject.activeInHierarchy)
         {
             return 9;
         }
