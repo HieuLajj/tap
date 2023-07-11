@@ -12,12 +12,15 @@ public class UIManager : Singleton<UIManager>
     private Vector2 lookAt;
     public InGameUI GameUIIngame;
     public Block BlockGiftPresent;
-
-
+    public RewardManager RewardManager;
+    public GameObject UIBoom;
+    public GameObject CompleteLevelUI;
+    public GiftUIManager giftUIManager;
+    public GameObject SelectLevelUI;
     public void SwipeScreen()
     {
-        lookAt.x = Mathf.Lerp(lookAt.x, -touchpad.LookInput().x, 25 * Time.deltaTime);
-        lookAt.y = Mathf.Lerp(lookAt.y, touchpad.LookInput().y, 25 * Time.deltaTime);
+        lookAt.x = Mathf.Lerp(lookAt.x, -touchpad.LookInput().x, 2 * Time.deltaTime);
+        lookAt.y = Mathf.Lerp(lookAt.y, touchpad.LookInput().y, 2 * Time.deltaTime);
         parent.transform.Rotate(Vector3.up, lookAt.x, Space.World);
         parent.transform.Rotate(Vector3.right, lookAt.y, Space.World);
         //parent.transform.Rotate(Vector3.up, -touchpad.LookInput().x, Space.World);

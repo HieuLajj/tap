@@ -6,10 +6,10 @@ using System.Security.Cryptography;
 using System.Xml.Linq;
 using TMPro;
 using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.UIElements;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 using static UnityEngine.UISystemProfilerApi;
 using Random = UnityEngine.Random;
 
@@ -148,8 +148,9 @@ public class Block : MonoBehaviour, IListenerBlock
     private void MoveGift()
     {
         Controller.Instance.gameState = StateGame.AWAIT;
-        UIManager.Instance.GameUIIngame.UIGift.SetActive(true);
+        //UIManager.Instance.GameUIIngame.UIGift.SetActive(true);
         UIManager.Instance.BlockGiftPresent = this;
+        UIManager.Instance.UIBoom.SetActive(false);
 
         StartCoroutine(IMoveGift());
     }
@@ -169,6 +170,9 @@ public class Block : MonoBehaviour, IListenerBlock
             yield return null;
         }
         transform.position = QuadraticCurve.Instance.evaluate(1);
+        UIManager.Instance.GameUIIngame.UIGift.SetActive(true);
+
+        LevelManager.Instance.pretransform.localScale = new Vector3(0, 0, 0);
     }
     public void checkRay()
     {
@@ -306,6 +310,8 @@ public class Block : MonoBehaviour, IListenerBlock
         statusBlock = StatusBlock.Die;
         checkDirection();
         transform.parent = LevelManager.Instance.temporarymain;
+
+        LevelManager.Instance.CheckWin();
         StartCoroutine(Run(transform.TransformDirection(dir2)));
     }
     IEnumerator Run(Vector3 direction)
@@ -330,7 +336,7 @@ public class Block : MonoBehaviour, IListenerBlock
             trail.transform.parent = TrailPooling.Instance.transform;
         }
         gameObject.SetActive(false);
-        LevelManager.Instance.CheckWin();
+        //LevelManager.Instance.CheckWin();
 
 
     }
@@ -468,19 +474,22 @@ public class Block : MonoBehaviour, IListenerBlock
 
     public void FlyBoomed()
     {
-        Vector3 direction = (transform.position - transform.parent.position).normalized;
+        //Vector3 direction = (transform.position - transform.parent.position).normalized;
+        Vector3 direction = Random.insideUnitSphere.normalized;
         Vector3 targetPosition = transform.position + direction * 5;
-        //transform.parent = LevelManager.Instance.temporarymain;
+        transform.parent = LevelManager.Instance.temporarymain;
         //Vector3 direction = (transform.position - transform.parent.position).normalized;
         //direction.y += Random.Range(3f, 5f); // Thêm thành phần theo chiều dọc
         //direction = direction.normalized;
         //Vector3 targetPosition = transform.position + direction * Random.Range(3f, 5f);
+        Quaternion targetRotation = Quaternion.Euler(Random.Range(0f, 360f), Random.Range(0f, 360f), Random.Range(0f, 360f));
 
         transform.DOMove(targetPosition, 2f).SetEase(Ease.OutQuad).OnComplete(() =>
         {
             gameObject.SetActive(false);
             LevelManager.Instance.CheckWin();
         });
+        transform.DORotate(targetRotation.eulerAngles, 2f);
     }
 
     public int IType()
@@ -489,7 +498,7 @@ public class Block : MonoBehaviour, IListenerBlock
         {
             return 9;
         }
-        if (!gameObject.activeInHierarchy)
+        if (!gameObject.activeInHierarchy || StatusBlock == StatusBlock.Die)
         {
             return -1;
         }

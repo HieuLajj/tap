@@ -4,30 +4,21 @@ using UnityEngine;
 
 public class InGameUI : MonoBehaviour
 {
-    // Start is called before the first frame update
-    
-    public GameObject Boom;
+  
+    //public GameObject Boom;
     public GameObject UIGift;
-    void Start()
-    {
-        
-    }
+    public GameObject CoinsUI;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+   
     public void ActiveBoom()
     {
-        if (Boom.activeInHierarchy)
+        if (Controller.Instance.Boom.activeInHierarchy)
         {
-            Boom.SetActive(false);
+            Controller.Instance.Boom.SetActive(false);
         }
         else
         {
-            Boom.SetActive(true);
+            Controller.Instance.Boom.SetActive(true);
         }
     }
 
@@ -38,11 +29,11 @@ public class InGameUI : MonoBehaviour
 
     public void ClearGift()
     {
+        LevelManager.Instance.pretransform.localScale = new Vector3(1,1,1);
         UIManager.Instance.BlockGiftPresent.gift.gameObject.SetActive(false);
         UIManager.Instance.BlockGiftPresent.gift.transform.parent = GiftPooling.Instance.transform;
         UIManager.Instance.BlockGiftPresent.gift = null;
         UIManager.Instance.BlockGiftPresent.gameObject.SetActive(false);
-
 
         Controller.Instance.gameState = StateGame.PLAY;
         UIGift.gameObject.SetActive(false);

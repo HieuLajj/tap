@@ -17,21 +17,21 @@ namespace EasyUI.Tabs {
       }
 
       [Header ("Tabs customization :")]
-      [SerializeField] private Color themeColor = Color.gray ;
+      //[SerializeField] private Color themeColor = Color.gray ;
       [SerializeField] private float tabSpacing = 2f ;
       [Space]
       [Header ("OnTabChange event :")]
       public TabsUIEvent OnTabChange ;
 
-      private TabButtonUI[] tabBtns ;
-      private GameObject[] tabContent ;
+      public TabButtonUI[] tabBtns ;
+      public GameObject[] tabContent ;
 
       #if UNITY_EDITOR
       private LayoutGroup layoutGroup ;
       #endif
 
-      private Color tabColorActive, tabColorInactive ;
-      private int current, previous ;
+      public Color tabColorActive, tabColorInactive ;
+      public int current, previous ;
 
       private Transform parentBtns, parentContent ;
 
@@ -76,23 +76,24 @@ namespace EasyUI.Tabs {
          tabContent [ 0 ].SetActive (true) ;
       }
 
-      public void OnTabButtonClicked (int tabIndex) {
-         if (current != tabIndex) {
-            if (OnTabChange != null)
-               OnTabChange.Invoke (tabIndex) ;
+      public virtual void OnTabButtonClicked (int tabIndex) {
+            
+         //if (current != tabIndex) {
+         //   if (OnTabChange != null)
+         //      OnTabChange.Invoke (tabIndex) ;
 
-            previous = current ;
-            current = tabIndex ;
+         //   previous = current ;
+         //   current = tabIndex ;
 
-            tabContent [ previous ].SetActive (false) ;
-            tabContent [ current ].SetActive (true) ;
+         //   tabContent [ previous ].SetActive (false) ;
+         //   tabContent [ current ].SetActive (true) ;
 
-            tabBtns [ previous ].uiImage.color = tabColorInactive ;
-            tabBtns [ current ].uiImage.color = tabColorActive ;
+         //   tabBtns [ previous ].uiImage.color = tabColorInactive ;
+         //   tabBtns [ current ].uiImage.color = tabColorActive ;
 
-            tabBtns [ previous ].uiButton.interactable = true ;
-            tabBtns [ current ].uiButton.interactable = false ;
-         }
+         //   tabBtns [ previous ].uiButton.interactable = true ;
+         //   tabBtns [ current ].uiButton.interactable = false ;
+         //}
       }
 
 
@@ -127,7 +128,7 @@ namespace EasyUI.Tabs {
             tabContent [ i ] = parentContent.GetChild (i).gameObject ;
          }
 
-         UpdateThemeColor (themeColor) ;
+         //UpdateThemeColor (themeColor) ;
 
          if (layoutGroup == null)
             layoutGroup = parentBtns.GetComponent <LayoutGroup> () ;

@@ -9,6 +9,7 @@ public class QuadraticCurve : Singleton<QuadraticCurve>
     public Transform B;
     public Transform Control;
     public Transform PreCameraPosition;
+    public Transform PreCameraPosition1;
     public Vector3 evaluate(float t)
     {
         Vector3 ac = Vector3.Lerp(A.position, Control.position, t);

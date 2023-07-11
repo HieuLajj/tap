@@ -10,6 +10,12 @@ public enum StateGame
     PLAY,
     WIN
 }
+public enum DiffirentEnum
+{
+    EASY,
+    MEDIUM,
+    HARD
+}
 public class Controller : Singleton<Controller>
 {
     public Vector3 screenPosition;
@@ -17,15 +23,15 @@ public class Controller : Singleton<Controller>
     private float timer = 0f;
     public UIManager manager;
 
-
+    public ParticleSystem WinPS;
     public List<IListenerBlock> ListenerBlock = new List<IListenerBlock>();
     public int amountNumberBlock = 0;
     public int checkloadBlock = 0;
     private StateGame stateGame = StateGame.AWAIT;
+    public GameObject Boom;
 
-
-    //test
-    public GameObject WinEffect;
+    public DiffirentEnum DiffirentGame = DiffirentEnum.EASY;
+    
     public StateGame gameState
     {
         get
@@ -41,7 +47,16 @@ public class Controller : Singleton<Controller>
             }
         }
     }
-
+    public readonly Dictionary<DiffirentEnum, int> constantsDiffical = new Dictionary<DiffirentEnum, int>()
+    {
+        { DiffirentEnum.EASY, 10 },
+        { DiffirentEnum.MEDIUM, 20 },
+        { DiffirentEnum.HARD, 30 }
+    };
+    private void Awake()
+    {
+        Application.targetFrameRate = 60;
+    }
     private void Start()
     {
        // timer = 0;
@@ -51,13 +66,17 @@ public class Controller : Singleton<Controller>
         //if(stateGame == StateGame.AWAITLOAD) {
         //    awaitload();
         //}
-    }
-
-    private void LateUpdate()
-    {
-        if(stateGame == StateGame.PLAY) {
+        if (stateGame == StateGame.PLAY)
+        {
             userInteraction();
         }
+    }
+ 
+    private void LateUpdate()
+    {
+        //if(stateGame == StateGame.PLAY) {
+        //    userInteraction();
+        //}
         //userInteraction();
     }
 
@@ -130,8 +149,32 @@ public class Controller : Singleton<Controller>
     {
         LevelManager.Instance.ClearDataSaveGame();
         //WinEffect.SetActive(true);
-        LevelManager.Instance.NextLevel();
+        //if (!WinPS.isPlaying)
+        //{
+        //    WinPS.Play();
+        //}
+        //Invoke("AwaitNext",2.0f);
+        AwaitNext();
     }
+    public void AwaitNext()
+    {
+        Debug.Log("?");
+        UIManager.Instance.CompleteLevelUI.SetActive(true);
+    }
+    //IEnumerator CheckTimeParticle()
+    //{
+    //    float time = 0;
+    //    while (WinPS.isPlaying && time<3)
+    //    {
+    //        time += Time.deltaTime;
+    //        yield return null;
+    //    }
+    //    UIManager.Instance.CompleteLevelUI.SetActive(true);
+    //}
+
+
+
+
 
 
 

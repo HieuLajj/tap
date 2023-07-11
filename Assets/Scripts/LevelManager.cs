@@ -46,6 +46,16 @@ public class LevelManager : Singleton<LevelManager>
     public int[] arrayDir;
     private int childCountParent;
 
+    //test
+    public int leasy = 4;
+    public int leamedium = 15;
+    public int leamehard = 35;
+    public  Dictionary<DiffirentEnum, int> DataDiffical = new Dictionary<DiffirentEnum, int>()
+    {
+        { DiffirentEnum.EASY, 10 },
+        { DiffirentEnum.MEDIUM, 15 },
+        { DiffirentEnum.HARD, 35 }
+    };
     private void Awake()
     {
         DOTween.SetTweensCapacity(10000, 10000);
@@ -61,7 +71,7 @@ public class LevelManager : Singleton<LevelManager>
         {
             Edittext(linesLevel[levelInt - 1]);
             pretransform.localPosition = new Vector3(statusLevel.x / 2, (float)statusLevel.y / 2, (float)statusLevel.z / 2);
-            Camera.main.transform.position = new Vector3((float)statusLevel.x / 2, (float)statusLevel.y / 2, ReturnyCamera(levelInt));
+            Camera.main.transform.position = new Vector3((float)statusLevel.x / 2, (float)statusLevel.y / 2+4, ReturnyCamera(levelInt));
             CreateMapToSave();
         }
         else
@@ -72,12 +82,17 @@ public class LevelManager : Singleton<LevelManager>
     }
     public void LoadLevelInGame(int level)
     {
+        //an man hinh chon level
+        if (UIManager.Instance.SelectLevelUI.activeInHierarchy)
+        {
+            UIManager.Instance.SelectLevelUI.SetActive(false);
+        }
         //an tat ca cac object con tren man hinh
         SetAllFalse();
         Edittext(linesLevel[level - 1]);
         LevelIDInt = level;
         pretransform.localPosition = new Vector3(statusLevel.x / 2, (float)statusLevel.y / 2, (float)statusLevel.z / 2);
-        Camera.main.transform.position = new Vector3((float)statusLevel.x / 2, (float)statusLevel.y / 2, ReturnyCamera(levelInt));
+        Camera.main.transform.position = new Vector3((float)statusLevel.x / 2, (float)statusLevel.y / 2+4, ReturnyCamera(levelInt));
         CreateMap();      
     }
     public void LoaddataFromLocal()
@@ -299,7 +314,8 @@ public class LevelManager : Singleton<LevelManager>
     {
         for (int i = 0; i < pretransform.childCount; i++)
         {
-            if (pretransform.GetChild(i).gameObject.activeInHierarchy)
+            GameObject g = pretransform.GetChild(i).gameObject;
+            if (g.activeInHierarchy && g.GetComponent<Block>().StatusBlock != StatusBlock.Die)
             {
                 return;
             }
@@ -356,18 +372,22 @@ public class LevelManager : Singleton<LevelManager>
         return null;
     }
 
-    public int ReturnyCamera(int index)
+    public float ReturnyCamera(int index)
     {
-        if (index < 20)
+        if(index <= 5)
+        {
+            return -13.5f;
+        }
+        else if (index < 20)
         {
             return -15;
-        }else if(index < 100)
+        }else if(index < 120)
         {
-            return -20;
+            return -16.5f;
         }
         else
         {
-            return -25;
+            return -23;
         }
     }
 }

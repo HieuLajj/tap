@@ -18,6 +18,10 @@ public class Boom : MonoBehaviour
     public float BoomRadius;
     public float SpeedBoom = 20;
     public Animator AnimatorBoom;
+    private Coroutine BoomCoroutine;
+    public ParticleSystem ExplosionPS;
+    public GameObject[] ModelBoom;
+    private bool hasExploded = false;
     public StateBoom BoomState
     {
         get
@@ -34,7 +38,7 @@ public class Boom : MonoBehaviour
                     GameObject target = LevelManager.Instance.GetRandomActiveChild();
                     if(target != null)
                     {
-                        StartCoroutine(IMoveBoom(target));
+                        BoomCoroutine = StartCoroutine(IMoveBoom(target));
                     }
                     else
                     {
@@ -51,24 +55,25 @@ public class Boom : MonoBehaviour
             }
         }
     }
-
+  
     private void OnEnable()
     {
+        ActiveModel();
         AnimatorBoom.speed = 1;
         // khi active thi khong co tuong tac xoay check them o ondisable
         Controller.Instance.gameState = StateGame.AWAIT;
-        transform.position = QuadraticCurve.Instance.PreCameraPosition.transform.position;
+        transform.position = QuadraticCurve.Instance.PreCameraPosition1.transform.position;
         stateBoom = StateBoom.AWAIT;
         transform.eulerAngles = new Vector3(0, 270, 0);
     }
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) && stateBoom == StateBoom.AWAIT)
         {
            BoomState = StateBoom.ACTIVE;
         }
-        if(Input.GetMouseButtonUp(0))
+        if(Input.GetMouseButtonUp(0) && stateBoom != StateBoom.FLY)
         {
             BoomState = StateBoom.FLY;
         }
@@ -79,10 +84,12 @@ public class Boom : MonoBehaviour
 
     }
 
-    private void OnDisable()
-    {
-        Controller.Instance.gameState = StateGame.PLAY;
-    }
+    //private void OnDisable()
+    //{
+
+
+    //    Controller.Instance.gameState = StateGame.PLAY;
+    //}
     private void MoveBoom()
     {
         screenPosition = Input.mousePosition;
@@ -108,23 +115,79 @@ public class Boom : MonoBehaviour
         }
         transform.position = QuadraticCurve.Instance.evaluate(1);
         CheckBoomed();
-        gameObject.SetActive(false);
+        //gameObject.SetActive(false);
     }
 
     public void CheckBoomed()
     {
+        ActiveEffect();
+        if (hasExploded)
+        {
+            return;
+        }
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, BoomRadius);
         foreach (var hitCollider in hitColliders)
         {
             if (hitCollider.gameObject.CompareTag("Block"))
             {
+                hitCollider.gameObject.GetComponent<Block>().StatusBlock = StatusBlock.Die;
                 hitCollider.gameObject.GetComponent<Block>().FlyBoomed();
             }
         }
+        hasExploded = true;
     }
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, BoomRadius);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (hasExploded)
+        {
+            return;
+        }
+        if (other.gameObject.CompareTag("Block"))
+        {
+            if (BoomCoroutine != null)
+            {
+                StopCoroutine(BoomCoroutine);
+            }
+            CheckBoomed();
+            //gameObject.SetActive(false);
+        }
+    }
+
+    public void ActiveEffect()
+    {
+        hasExploded = false;
+        DisActiveModel();
+        if (!ExplosionPS.isPlaying)
+        {
+            ExplosionPS.Play();
+        }
+    }
+
+    public void DisActiveModel()
+    {
+        for(int i=0; i<ModelBoom.Length; i++)
+        {
+            ModelBoom[i].SetActive(false);
+        }
+        Controller.Instance.gameState = StateGame.PLAY;
+        Invoke("DisActiveGame", 2f);
+        
+    }
+    public void DisActiveGame()
+    {
+        gameObject.SetActive(false);
+    }
+    public void ActiveModel()
+    {
+        for (int i = 0; i < ModelBoom.Length; i++)
+        {
+            ModelBoom[i].SetActive(true);
+        }
     }
 }
